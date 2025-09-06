@@ -8,9 +8,9 @@
   outputs = { self, nixpkgs }:
     let
       system = "x86_64-linux";
-      version = "1.15.4b";
+      version = "1.15.5b";
       download.url = "https://github.com/zen-browser/desktop/releases/download/${version}/zen.linux-x86_64.tar.xz";
-	    download.sha256 = "0r644rx24xbsrn9js424iqb74zlg64a63rrrpl8dyx2sz7j2vh4v";
+	    download.sha256 = "1dx5kb9w1b51pigi7ql7xrw984gjjrk6sagzkg4hnqaw8zgj02d3";
 
       pkgs = import nixpkgs {
         inherit system;
