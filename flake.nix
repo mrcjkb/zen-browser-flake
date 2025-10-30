@@ -2,7 +2,7 @@
   description = "Zen Browser";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
   outputs = { self, nixpkgs }:
@@ -40,7 +40,7 @@
 
 		  phases = [ "installPhase" "fixupPhase" ];
 
-		  nativeBuildInputs = [ pkgs.makeWrapper pkgs.copyDesktopItems pkgs.wrapGAppsHook ] ;
+		  nativeBuildInputs = [ pkgs.makeWrapper pkgs.copyDesktopItems pkgs.wrapGAppsHook3 ] ;
 
       installPhase = ''
         mkdir -p $out/bin && cp -r $src/* $out/bin
