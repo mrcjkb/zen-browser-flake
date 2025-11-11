@@ -10,7 +10,7 @@
       system = "x86_64-linux";
       version = "1.17.6b";
       download.url = "https://github.com/zen-browser/desktop/releases/download/${version}/zen.linux-x86_64.tar.xz";
-	    download.sha256 = "19f3j0lxbwvmzqc3rvq2c3z2wfdpvh0nbjdgj0ln3z580xaj6ygj";
+	    download.sha256 = "17hbc4mmqi9mj38igh5d023ix9fx83pki1mnznz16glxs7ghllmb";
 
       pkgs = import nixpkgs {
         inherit system;
