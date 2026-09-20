@@ -8,9 +8,9 @@
   outputs = { self, nixpkgs }:
     let
       system = "x86_64-linux";
-      version = "1.21.16b";
+      version = "1.22.2b";
       download.url = "https://github.com/zen-browser/desktop/releases/download/${version}/zen.linux-x86_64.tar.xz";
-	    download.sha256 = "0fcj263mlcr5yvp54qv59jhgw27r9p3inwnkxxxfy81zih7gzgf1";
+	    download.sha256 = "14w1024ydlxw0jw3361h6wwraaf3inrr6lpz4qp2xv9h1nycl5bp";
 
       pkgs = import nixpkgs {
         inherit system;
@@ -22,16 +22,15 @@
         gtk3 libxml2 dbus xcb-util-cursor alsa-lib libpulseaudio pango atk cairo gdk-pixbuf glib
 	udev libva mesa libnotify cups pciutils
 	ffmpeg libglvnd pipewire
-      ] ++ (with pkgs.xorg; [
         libxcb libX11 libXcursor libXrandr libXi libXext libXcomposite libXdamage
 	libXfixes libXScrnSaver
-      ]);
+      ];
 
     mkZen = pkgs.stdenv.mkDerivation {
       inherit version;
 		  pname = "zen-browser";
 
-      src = builtins.fetchTarball {
+      src = fetchTarball {
         url = download.url;
         sha256 = download.sha256;
       };
@@ -50,18 +49,17 @@
 
       fixupPhase = ''
         chmod 755 $out/bin/*
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/zen
-        wrapProgram $out/bin/zen --set LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath runtimeLibs}" \
-                      --set MOZ_LEGACY_PROFILES 1 --set MOZ_ALLOW_DOWNGRADE 1 --set MOZ_APP_LAUNCHER zen --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH"
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/zen-bin
-        wrapProgram $out/bin/zen-bin --set LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath runtimeLibs}" \
-                      --set MOZ_LEGACY_PROFILES 1 --set MOZ_ALLOW_DOWNGRADE 1 --set MOZ_APP_LAUNCHER zen --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH"
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/glxtest
-        wrapProgram $out/bin/glxtest --set LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath runtimeLibs}"
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/updater
-        wrapProgram $out/bin/updater --set LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath runtimeLibs}"
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/vaapitest
-        wrapProgram $out/bin/vaapitest --set LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath runtimeLibs}"
+        for bin in $out/bin/*; do
+          [ -f "$bin" ] || continue
+          patchelf --print-interpreter "$bin" >/dev/null 2>&1 || continue
+          patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$bin"
+          if [ "$bin" = "$out/bin/zen" ] || [ "$bin" = "$out/bin/zen-bin" ]; then
+            wrapProgram "$bin" --set LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath runtimeLibs}" \
+              --set MOZ_LEGACY_PROFILES 1 --set MOZ_ALLOW_DOWNGRADE 1 --set MOZ_APP_LAUNCHER zen --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH"
+          else
+            wrapProgram "$bin" --set LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath runtimeLibs}"
+          fi
+        done
       '';
 
       meta.mainProgram = "zen";
